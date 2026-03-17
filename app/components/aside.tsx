@@ -2,21 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { type subscription } from "../lib/subscription"
+import { subs } from "../lib/data/subscriptions"
 
 export default function Aside({ isOpen, setAsideOpen }){
 
-    const [ subscriptionsList ] = useState<subscription[]>([
-        {
-            name: "netflix",
-            // color: "#ffAAaa"
-            color : "#1e1b18"
-        } as subscription,
-        {
-            name: "prime video",
-            nextPay: [1],
-            color: "#aaff00"
-        } as subscription,
-    ])
+    const [ subscriptionsList ] = useState<subscription[]>(subs)
     const [isVisible, setIsVisible] = useState(false)
 
     useEffect(() => {

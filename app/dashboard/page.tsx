@@ -6,10 +6,16 @@ import Aside from "../components/aside"
 import { useState } from "react"
 import { type subscription } from "../lib/subscription"
 import { DayCard } from "../components/dayCard"
+import { subs } from "../lib/data/subscriptions"
 
-
-function CircleChart({ subscriptions }: { subscriptions: subscription[] }) {
-    const totalCost = subscriptions.reduce((sum, s) => sum + s.cost, 0)
+function CircleChart({ subscriptions, weekDays }: { subscriptions: subscription[], weekDays?: number[] }) {
+    const filteredSubs = weekDays 
+        ? subscriptions.filter(sub => sub.nextPay.some(day => weekDays.includes(day)))
+        : subscriptions
+    
+    const totalCost = filteredSubs.reduce((sum, s) => sum + s.cost, 0)
+    
+    const label = weekDays ? "Total semanal" : "Total mensual"
     const size = 260
     const strokeWidth = 20
     const radius = (size - strokeWidth) / 2
@@ -17,8 +23,8 @@ function CircleChart({ subscriptions }: { subscriptions: subscription[] }) {
     
     const gap = 20
     
-    const itemsWithSegments = subscriptions.reduce<{sub: subscription, percentage: number, dashLength: number, offset: number}[]>((acc, sub) => {
-        const percentage = (sub.cost / totalCost) * 100
+    const itemsWithSegments = filteredSubs.reduce<{sub: subscription, percentage: number, dashLength: number, offset: number}[]>((acc, sub) => {
+        const percentage = totalCost > 0 ? (sub.cost / totalCost) * 100 : 0
         const dashLength = (percentage / 100) * circumference - gap
         const offset = acc.reduce((sum, item) => sum + item.dashLength + gap, 0)
         acc.push({ sub, percentage, dashLength, offset })
@@ -47,25 +53,24 @@ function CircleChart({ subscriptions }: { subscriptions: subscription[] }) {
             
             <div className="text-center z-10 cursor-pointer">
                 <span className="text-3xl font-bold text-primary">${totalCost.toFixed(2)}</span>
-                <p className="text-xs text-gray-400 mt-1">Total mensual</p>
+                <p className="text-xs text-gray-400 mt-1">{label}</p>
             </div>
         </div>
     )
 }
 
-function ViewSubscriptions({ subscriptions, monthView }: { subscriptions: subscription[], monthView:boolean }) {
+function ViewSubscriptions({ subscriptions, monthView, weekDays }: { subscriptions: subscription[], monthView:boolean, weekDays?: number[] }) {
 
     const now = new Date()
     const year = now.getFullYear()
     const month = now.getMonth()
-    const daysInMonth = new Date(year, month, 0).getDate()
-    let firstDayOfMonth = new Date(year, month, 1).getDay() -1
-    if (firstDayOfMonth == -1){
-        firstDayOfMonth = 6 // Domingo
-    }
-
+    
     if (monthView) {
-        // Crear array con los días del mes
+        const daysInMonth = new Date(year, month, 0).getDate()
+        let firstDayOfMonth = new Date(year, month, 1).getDay() -1
+        if (firstDayOfMonth == -1){
+            firstDayOfMonth = 6 // Domingo
+        }
         const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
         return (
             <div className="grid grid-cols-7 gap-1">
@@ -73,7 +78,6 @@ function ViewSubscriptions({ subscriptions, monthView }: { subscriptions: subscr
                     <div key={`empty-${i}`} />
                 ))}
                 {days.map((day) => {
-                    // Encontrar suscripciones de este día
                     const subsOnDay = subscriptions.filter(sub => 
                         sub.nextPay.includes(day)
                     )
@@ -90,28 +94,10 @@ function ViewSubscriptions({ subscriptions, monthView }: { subscriptions: subscr
         )
     }
 
-    const today = new Date().getDate()
-    const dayOfWeek = new Date(year, month,today).getDay()   // esto me da el numero del dia de la semana
-                                                                            // ej; dia 17 == 2 que es MARTES
-    const firstDayOfWeek = today - (dayOfWeek - 1) // 1 es offset
-    const lastDayOfWeek = new Date(year, month, firstDayOfWeek + 6).getDate()
-    console.log("[today]: ", today, "\n",
-        "[tDayOfWeek]: ", dayOfWeek, "\n",
-        "[firstDayOfWeek]: ", firstDayOfWeek, "\n",
-        "[lastDayOfWeek]: ", lastDayOfWeek, "\n"
-    )
-    // const isToday = now.getDate() === day
-    const startDate = new Date(year, month, firstDayOfWeek)
-    // Iterar 7 días de la semana
-    const weekDays = Array.from({ length: 7 }, (_, i) => {
-        const currentDate = new Date(startDate)
-        currentDate.setDate(startDate.getDate() + i)
-        return currentDate.getDate() // número del día
-    })
-    // Renderizar
+    const week = weekDays || []
     return (
         <div className="grid grid-cols-7 gap-1">
-            {weekDays.map((day) => {
+            {week.map((day) => {
                 const subsOnDay = subscriptions.filter(sub => 
                     sub.nextPay.includes(day)
                 )
@@ -127,34 +113,24 @@ export default function Dashboard() {
     
     const [asideOpen, setAsideOpen] =useState(false)
     const [monthView, setMonthView] = useState(false) // true == month false == week
-    const [ subscriptionsList ] = useState<subscription[]>([
-        {
-            name: "netflix",
-            // color: "#ffAAaa"
-            color : "#1e1b18",
-            nextPay:[24],
-            cost: 5
-        } as subscription,
-        {
-            name: "prime video",
-            nextPay: [1,2],
-            color: "#aaff00",
-            cost: 3.45
-        } as subscription,
-        {
-            name: "azuza",
-            nextPay: [1,18],
-            color: "#ffAAaa",
-            cost: 7.32
-        } as subscription,
-    ])
+    const [ subscriptionsList ] = useState<subscription[]>(subs)
+
+    const now = new Date()
+    const today = now.getDate()
+    const firstDayOfWeek = today - (now.getDay() - 1)
+    const startDate = new Date(now.getFullYear(), now.getMonth(), firstDayOfWeek)
+    const weekDays = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(startDate)
+        d.setDate(startDate.getDate() + i)
+        return d.getDate()
+    })
 
     return(
         <>
             <Header asideOpen={asideOpen} setAsideOpen={setAsideOpen}/>
             <Aside isOpen={asideOpen} setAsideOpen={setAsideOpen}/>
             <main className="flex flex-col items-center justify-center">
-                <CircleChart subscriptions={subscriptionsList} />
+                <CircleChart subscriptions={subscriptionsList} weekDays={!monthView ? weekDays : undefined} />
 
                 <div>
                     <div className="flex">
@@ -174,7 +150,7 @@ export default function Dashboard() {
                                 </span>
                         </button>
                     </div>
-                <ViewSubscriptions subscriptions={subscriptionsList} monthView={monthView}/>
+                <ViewSubscriptions subscriptions={subscriptionsList} monthView={monthView} weekDays={!monthView ? weekDays : undefined}/>
                 </div>
             </main>
         </>
