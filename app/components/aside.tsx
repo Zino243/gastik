@@ -1,6 +1,5 @@
 "use client"
 
-import { spawn } from "node:child_process"
 import { useEffect, useState } from "react"
 
 interface subscription {
@@ -11,7 +10,7 @@ interface subscription {
 
 export default function Aside({ isOpen, setAsideOpen }){
 
-    const [ subscriptionsList, setSubscriptionsList ] = useState<subscription[]>([
+    const [ subscriptionsList ] = useState<subscription[]>([
         {
             name: "netflix",
             // color: "#ffAAaa"
