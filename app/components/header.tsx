@@ -1,7 +1,8 @@
 import Image from "next/image"
 import placeHolderImage from '../../public/placeholder.png'
+import { Dispatch, SetStateAction } from "react"
 
-export default function Header({ asideOpen, setAsideOpen }) {
+export default function Header({ asideOpen, setAsideOpen }: { asideOpen: boolean, setAsideOpen:Dispatch<SetStateAction<boolean>> }) {
     return (
         <>
         <header className="
