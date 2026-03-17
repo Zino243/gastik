@@ -7,6 +7,7 @@ import { useState } from "react"
 import { type subscription } from "../lib/subscription"
 import { DayCard } from "../components/dayCard"
 import { subs } from "../lib/data/subscriptions"
+import CreateSubscriptionModal from "../components/createSubscriptionModal"
 
 function CircleChart({ subscriptions, weekDays }: { subscriptions: subscription[], weekDays?: number[] }) {
     const filteredSubs = weekDays 
@@ -127,6 +128,7 @@ export default function Dashboard() {
 
     return(
         <>
+            <CreateSubscriptionModal/>
             <Header asideOpen={asideOpen} setAsideOpen={setAsideOpen}/>
             <Aside isOpen={asideOpen} setAsideOpen={setAsideOpen}/>
             <main className="flex flex-col items-center justify-center">
@@ -153,7 +155,6 @@ export default function Dashboard() {
                 <ViewSubscriptions subscriptions={subscriptionsList} monthView={monthView} weekDays={!monthView ? weekDays : undefined}/>
                 </div>
             </main>
-        </>
-
+            </>
     )
 }
