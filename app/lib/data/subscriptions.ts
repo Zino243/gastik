@@ -2,7 +2,6 @@ import { type subscription } from "../subscription";
 
 export const subs = [{
             name: "netflix",
-            // color: "#ffAAaa"
             color : "#ff1b18",
             nextPay:[24],
             cost: 5
