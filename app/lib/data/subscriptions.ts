@@ -4,7 +4,6 @@ export const subs = [{
             name: "netflix",
             color : "#ff1b18",
             nextPay:[24],
-            
             cost: 5
         } as subscription,
         {
