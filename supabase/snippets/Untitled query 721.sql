@@ -1,0 +1,1 @@
+SELECT "pg_policy.polname", permissive FROM pg_policy WHERE tablename = 'Service';

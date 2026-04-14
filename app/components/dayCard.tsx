@@ -1,7 +1,7 @@
-import { subscription } from "../lib/subscription";
+import { UserSubscription } from "../lib/subscription";
 interface DayCardProps {
     day: number;
-    subscriptions?: subscription[];
+    subscriptions?: (UserSubscription & { Service?: { name: string; logo: string }; Category?: { name: string } })[];
 }
 export function DayCard({ day, subscriptions }: DayCardProps) {
     const now = new Date()
@@ -16,8 +16,7 @@ export function DayCard({ day, subscriptions }: DayCardProps) {
                 {subscriptions?.map((sub, i) => (
                     <div 
                         key={i}
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: sub.color }}
+                        className="w-2 h-2 rounded-full bg-primary"
                     />
                 ))}
             </div>
